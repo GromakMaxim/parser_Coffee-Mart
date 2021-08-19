@@ -1,5 +1,6 @@
 package org.gromak.grabling;
 
+import org.gromak.db.QueryKeeper;
 import org.gromak.entity.Good;
 import org.gromak.entity.GoodBuilder;
 import org.gromak.visitor.LinkVisitor;
@@ -8,16 +9,15 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class ContentGrabber implements Runnable {
     private Document document;
-    private HashMap<String, Good> goods = new HashMap<>();
+    private QueryKeeper queryKeeper;
 
-
-    public ContentGrabber(Document document) {
+    public ContentGrabber(Document document, QueryKeeper queryKeeper) {
         this.document = document;
+        this.queryKeeper = queryKeeper;
     }
 
     @Override
@@ -26,11 +26,11 @@ public class ContentGrabber implements Runnable {
         var containers = document.select("div.prod-item-container");
 
         for (Element container : containers) {
-            String title = parseTitle(container);
-            String status = parseCardStatus(container);
-            String cardEndpoint = parseCardIndividualLink(container);
+            String title = findTitle(container);
+            String status = findCardStatus(container);
+            String cardEndpoint = findCardIndividualLink(container);
             String cardLink = "https://www.coffee-mart.ru" + cardEndpoint;
-            int price = parsePrice(container);
+            int price = findPrice(container);
 
             gb.withTitle(title);
             gb.withCardStatus(status);
@@ -38,29 +38,24 @@ public class ContentGrabber implements Runnable {
             gb.withLink(cardLink);
 
             Document doc = new LinkVisitor().getRawHTML(cardLink, false);
-            parseContainerContent(gb, doc);
-
-
-
+            findContainerContent(gb, doc);
 
             Good good = gb.build();
-            System.out.println(good);
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            goods.put(good.getCode(), good);
+            queryKeeper.addQuery(good);
             gb.reset();
         }
-
     }
 
-    private String parseTitle(Element container) {
-        return container.select(".prod-title").select("a").text();
+    private String findTitle(Element container) {
+        try {
+            return container.select(".prod-title").select("a").text();
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return "";
+        }
     }
 
-    private String parseCardStatus(Element container) {
+    private String findCardStatus(Element container) {
         List<String> cardStatusClasses;
         try {
             cardStatusClasses = new ArrayList<>(container
@@ -77,14 +72,19 @@ public class ContentGrabber implements Runnable {
     }
 
     //получить ссылку на страничку товара
-    private String parseCardIndividualLink(Element container) {
-        return container
-                .select("div.prod-title")
-                .select("a")
-                .attr("href");
+    private String findCardIndividualLink(Element container) {
+        try {
+            return container
+                    .select("div.prod-title")
+                    .select("a")
+                    .attr("href");
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return "";
+        }
     }
 
-    private int parsePrice(Element container) {
+    private int findPrice(Element container) {
         try {
             int price = Integer.parseInt(
                     container
@@ -111,14 +111,14 @@ public class ContentGrabber implements Runnable {
         }
     }
 
-    private void parseContainerContent(GoodBuilder gb, Document document) {
+    private void findContainerContent(GoodBuilder gb, Document document) {
         Elements infoList = document.select("ul.prod-info-list");
         Elements tabs = document.select("div.tab-content");
 
-        String code = parseCode(infoList);
-        String country = parseCountry(infoList);
-        String producer = parseProducer(infoList);
-        String description = parseDescription(tabs);
+        String code = findCode(infoList);
+        String country = findCountry(infoList);
+        String producer = findProducer(infoList);
+        String description = findDescription(tabs);
 
         String weight = getSpecFromSpecificationsList(tabs, "Вес");
         String color = getSpecFromSpecificationsList(tabs, "Цвет");
@@ -134,20 +134,36 @@ public class ContentGrabber implements Runnable {
         gb.withMaterialType(materialType);
     }
 
-    private String parseCode(Elements infoList){
-        return infoList.select("li").get(0).select("span").text();
+    private String findCode(Elements infoList) {
+        try {
+            return infoList.select("li").get(0).select("span").text();
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return "";
+        }
+
     }
 
-    private String parseCountry(Elements infoList){
-        return infoList.select("li").get(1).select("span").text();
+    private String findCountry(Elements infoList) {
+        try {
+            return infoList.select("li").get(1).select("span").text();
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return "";
+        }
     }
 
-    private String parseProducer(Elements infoList){
-        String tempStr = infoList.select("li").get(2).select("span").text();
-        return tempStr.split(" ")[2];
+    private String findProducer(Elements infoList) {
+        try {
+            String tempStr = infoList.select("li").get(2).select("span").text();
+            return tempStr.split(" ")[2];
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return "";
+        }
     }
 
-    private String parseDescription(Elements tabs) {
+    private String findDescription(Elements tabs) {
         try {
             return tabs
                     .select("#tab-1")
