@@ -1,6 +1,8 @@
 package org.gromak;
 
-import org.gromak.grabling.ThreadProcessor;
+import org.gromak.db.QueryKeeper;
+import org.gromak.db.QueryThreadProcessor;
+import org.gromak.grabling.ParsingThreadProcessor;
 import org.gromak.visitor.LinkVisitor;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -16,24 +18,14 @@ public class ParserInitializer {
     private Set<String> mainGroupsEndpoints = new HashSet<>();
     private Set<String> subGroupsEndpoints = new HashSet<>();
 
-    public Set<String> getAllEndpoints() {
-        return allEndpoints;
-    }
-
-    public Set<String> getMainGroupsEndpoints() {
-        return mainGroupsEndpoints;
-    }
-
-    public Set<String> getSubGroupsEndpoints() {
-        return subGroupsEndpoints;
-    }
+    private QueryKeeper queryKeeper = new QueryKeeper();
 
     public ParserInitializer() {
-        System.out.println("ParserInitializer called LinkVisitor: " + mainLink + " false");
         document = new LinkVisitor().getRawHTML(mainLink, false);
     }
 
     public void init() {
+        System.out.println("ParserInitializer started");
         findRefsFromMainMenu();
         sendLinkSetToExecution();
     }
@@ -59,6 +51,7 @@ public class ParserInitializer {
     }
 
     public void sendLinkSetToExecution() {
-        new ThreadProcessor(mainGroupsEndpoints).init();
+        new ParsingThreadProcessor(mainGroupsEndpoints, queryKeeper);
+        new QueryThreadProcessor(queryKeeper);
     }
 }

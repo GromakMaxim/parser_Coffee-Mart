@@ -1,9 +1,7 @@
 package org.gromak;
 
-import java.io.IOException;
-
 public class App {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         ParserInitializer parserInitializer = new ParserInitializer();
         parserInitializer.init();
     }
