@@ -1,5 +1,6 @@
 package org.gromak.entity;
 
+/**The basic entity obtained during site parsing. Represents a unit of the product/item on the page*/
 public class Good {
     private String code; //код позиции
     private String title; //название

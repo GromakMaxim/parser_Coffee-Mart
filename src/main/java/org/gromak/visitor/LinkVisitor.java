@@ -5,6 +5,7 @@ import org.jsoup.nodes.Document;
 
 import java.io.IOException;
 
+/**Performs 'clicking' on links and getting raw html*/
 public class LinkVisitor {
     private String userAgent;
     private String referrer;

@@ -10,35 +10,37 @@ import org.jsoup.nodes.Element;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Gets links to product groups from the main page of the site.
+ * Sends the received links to the ParsingThreadProcessor for processing.
+ * Starts the QueryThreadProcessor so that it waits for the results from the ParsingThreadProcessor in QueryKeeper.
+ */
 public class ParserInitializer {
-    private Document document;
+    private Document document; //raw html from main page
     private String mainLink = "https://www.coffee-mart.ru";
 
     private Set<String> allEndpoints = new HashSet<>();
     private Set<String> mainGroupsEndpoints = new HashSet<>();
     private Set<String> subGroupsEndpoints = new HashSet<>();
 
-    private QueryKeeper queryKeeper = new QueryKeeper();
+    private QueryKeeper queryKeeper = new QueryKeeper(); //stores the found products
 
     public ParserInitializer() {
         document = new LinkVisitor().getRawHTML(mainLink, false);
     }
 
     public void init() {
-        System.out.println("ParserInitializer started");
         findRefsFromMainMenu();
         sendLinkSetToExecution();
     }
 
     private void findRefsFromMainMenu() {
-        //найти все ссылки на группы товаров
         var elements = document
                 .select(".header-main-nav")
                 .select("ul")
                 .select("li")
                 .select("a[href]");
 
-        //распределяем полученные ссылки: ссылка на группу товара или товарную подгруппу
         for (Element e : elements) {
             String endpoint = e.attr("href");
             String foundLink = mainLink + endpoint;

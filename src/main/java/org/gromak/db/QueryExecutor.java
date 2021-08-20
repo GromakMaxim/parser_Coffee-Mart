@@ -7,6 +7,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+/**Runnable task for QueryThreadProcessor. Performs saving to the database.*/
 public class QueryExecutor implements Runnable {
     private Good good;
     private Connection connection;
@@ -51,7 +52,6 @@ public class QueryExecutor implements Runnable {
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
-
         }
     }
 }

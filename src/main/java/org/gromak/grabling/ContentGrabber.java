@@ -11,6 +11,9 @@ import org.jsoup.select.Elements;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Runnable task for ParsingThreadProcessor. Iteratively collects information for each product on its page.
+ */
 public class ContentGrabber implements Runnable {
     private Document document;
     private QueryKeeper queryKeeper;
@@ -22,7 +25,7 @@ public class ContentGrabber implements Runnable {
 
     @Override
     public void run() {
-        GoodBuilder gb = new GoodBuilder();
+        GoodBuilder gb = new GoodBuilder();//builder pattern
         var containers = document.select("div.prod-item-container");
 
         for (Element container : containers) {
@@ -41,7 +44,7 @@ public class ContentGrabber implements Runnable {
             findContainerContent(gb, doc);
 
             Good good = gb.build();
-            queryKeeper.addQuery(good);
+            queryKeeper.addQuery(good);//add the received goods to the storage, for further addition to the database
             gb.reset();
         }
     }
@@ -71,7 +74,7 @@ public class ContentGrabber implements Runnable {
         return "";
     }
 
-    //получить ссылку на страничку товара
+    /**Get a link to the product page*/
     private String findCardIndividualLink(Element container) {
         try {
             return container
@@ -111,6 +114,7 @@ public class ContentGrabber implements Runnable {
         }
     }
 
+    /**receives info from the personal product page*/
     private void findContainerContent(GoodBuilder gb, Document document) {
         Elements infoList = document.select("ul.prod-info-list");
         Elements tabs = document.select("div.tab-content");

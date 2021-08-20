@@ -3,6 +3,7 @@ package org.gromak.db;
 import org.gromak.entity.Good;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+/**Storage for thread-safe work with received good*/
 public class QueryKeeper {
     public ConcurrentLinkedQueue<Good> queue;
 
@@ -11,10 +12,6 @@ public class QueryKeeper {
     }
 
     public void addQuery(Good good){
-        System.out.println("Query added: " + good + " size" +queue.size());
         queue.add(good);
-    }
-    public Good takeQuery(){
-        return queue.poll();
     }
 }

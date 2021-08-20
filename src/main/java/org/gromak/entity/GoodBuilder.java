@@ -1,5 +1,6 @@
 package org.gromak.entity;
 
+/**builder pattern*/
 public final class GoodBuilder {
     private Good g = new Good();
 

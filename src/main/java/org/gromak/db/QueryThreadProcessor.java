@@ -1,12 +1,14 @@
 package org.gromak.db;
 
-import com.mysql.cj.jdbc.MysqlDataSource;
 import org.gromak.entity.Good;
 
-import java.sql.Connection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**Creates an ExecutorService for working with QueryKeeper.
+ * Checks its contents every second and, when detected, creates a runnable task (QueryExecutor) to add to the database.
+ * If the storage does not receive data from parsing for a certain time, it stops working.
+ * */
 public class QueryThreadProcessor {
     private QueryKeeper queryKeeper;
 
@@ -31,7 +33,7 @@ public class QueryThreadProcessor {
             try {
                 Good g = queryKeeper.queue.poll();
                 if (g == null) {
-                    System.out.println("there is no task in queue.. iam waiting: " + counter +"/60");
+                    System.out.println("There is no task in queue.. I'm waiting: " + counter +"/60");
                     counter++;
                     Thread.sleep(1000);
                 } else {
