@@ -14,4 +14,7 @@ public class QueryKeeper {
         System.out.println("Query added: " + good + " size" +queue.size());
         queue.add(good);
     }
+    public Good takeQuery(){
+        return queue.poll();
+    }
 }
