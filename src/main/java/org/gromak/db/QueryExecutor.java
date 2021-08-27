@@ -1,21 +1,21 @@
 package org.gromak.db;
 
+import org.gromak.Options;
 import org.gromak.entity.Good;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 
-/**Runnable task for QueryThreadProcessor. Performs saving to the database.*/
+/**
+ * Runnable task for QueryThreadProcessor. Performs saving to the database.
+ */
 public class QueryExecutor implements Runnable {
     private Good good;
     private Connection connection;
 
-    public QueryExecutor(Good good){
+    public QueryExecutor(Good good) {
         this.good = good;
         try {
-            this.connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/my_db?useSSL=false&amp&serverTimezone=UTC","bestuser","bestuser");
+            this.connection = DriverManager.getConnection(Options.DBURL.getValue(), Options.DBUSER.getValue(), Options.DBPASSWORD.getValue());
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
